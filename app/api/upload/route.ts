@@ -6,6 +6,8 @@ export async function POST(request: Request) {
   const { filename, contentType } = await request.json()
 
   try {
+    console.log(process.env.AWS_REGION);
+    console.log(process.env.AWS_BUCKET_NAME);
     const client = new S3Client({ region: process.env.AWS_REGION })
     const { url, fields } = await createPresignedPost(client, {
       Bucket: process.env.AWS_BUCKET_NAME,
