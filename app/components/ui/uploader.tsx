@@ -8,6 +8,48 @@
 import React, {useState} from "react"
 import {Button} from "@/components/ui/button"
 
+async function extracted(file) {
+    const response = await fetch(
+        process.env.NEXT_PUBLIC_BASE_URL + '/api/upload',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({filename: file.name, contentType: file.type}),
+        }
+    )
+
+    if (response.ok) {
+        const {url, fields} = await response.json()
+
+        const formData = new FormData()
+        Object.entries(fields).forEach(([key, value]) => {
+            formData.append(key, value as string);
+            console.log(key);
+            console.log(value as string);
+        })
+
+        formData.append('file', file)
+
+        console.log("url " + url);
+        const uploadResponse = await fetch(url, {
+            method: 'POST',
+            body: formData,
+        })
+
+        if (uploadResponse.ok) {
+            alert('Upload successful!')
+            //criar registro em Documentos
+        } else {
+            console.error('S3 Upload Error:', uploadResponse)
+            alert('Upload failed.')
+        }
+    } else {
+        alert('Failed to get pre-signed URL.')
+    }
+}
+
 export default function Uploader() {
     // Maximum file size (10MB in this example)
     const maxFileSize = 10 * 1024 * 1024; // 10 MB
@@ -51,44 +93,34 @@ export default function Uploader() {
         setUploading(true)
 
         await Promise.all(files.map(async (file) => {
-            const response = await fetch(
-                process.env.NEXT_PUBLIC_BASE_URL + '/api/upload',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({filename: file.name, contentType: file.type}),
-                }
-            )
 
-            if (response.ok) {
-                const {url, fields} = await response.json()
+            const originalFile = file;
+            const imageFile = file;
+            //check whether the file type is image or pdf. If PDF, convert PDF to image
+            // if (file.type === 'application/pdf') {
+            //     const pdf = await pdfjsLib.getDocument(file);
+            //     const page = await pdf.getPage(1);
+            //     const scale = 1.5;
+            //     const viewport = page.getViewport({scale});
+            //     const canvas = document.createElement('canvas');
+            //     const context = canvas.getContext('2d');
+            //     canvas.height = viewport.height;
+            //     canvas.width = viewport.width;
+            //     const renderContext = {
+            //         canvasContext: context,
+            //         viewport: viewport
+            //     };
+            //     const renderTask = page.render(renderContext);
+            //     await renderTask.promise;
+            //     const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
+            //     const blob = await fetch(dataUrl).then(r => r.blob());
+            //     imageFile = new File([blob], file.name, {type: 'image/jpeg'});
+            // }
 
-                const formData = new FormData()
-                Object.entries(fields).forEach(([key, value]) => {
-                    formData.append(key, value as string);
-                    console.log(key);
-                    console.log(value as string);
-                })
-
-                formData.append('file', file)
-
-                console.log("url " + url);
-                const uploadResponse = await fetch(url, {
-                    method: 'POST',
-                    body: formData,
-                })
-
-                if (uploadResponse.ok) {
-                    alert('Upload successful!')
-                } else {
-                    console.error('S3 Upload Error:', uploadResponse)
-                    alert('Upload failed.')
-                }
-            } else {
-                alert('Failed to get pre-signed URL.')
+            if(imageFile){
+                
             }
+            await extracted(file);
         }));
         setUploading(false);
         setFiles([]);

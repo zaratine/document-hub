@@ -1,0 +1,52 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Document {
+  id            String    @id @default(cuid())
+  amount        Decimal
+  upload_date   DateTime  @default(now())
+  document_date DateTime
+  status        String // 'pending' | 'completed' | 'exported';
+  url_original  String
+  url_image     String
+  type          String //'receipt' | 'billet' | 'other';
+  extension     String //'png' | 'pdf' | 'jpg';
+  description   String
+  category      Category? @relation(fields: [categoryId], references: [id])
+  categoryId    String
+  supplier      Supplier? @relation(fields: [supplierId], references: [id])
+  supplierId    String
+  company       Company?  @relation(fields: [companyId], references: [id])
+  companyId     String?
+}
+
+model Supplier {
+  id       String     @id @default(cuid())
+  name     String
+  Document Document[]
+}
+
+model Category {
+  id       String     @id @default(cuid())
+  name     String
+  Document Document[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?  @unique
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?
+}
+
+model Company {
+  id        String     @id @default(cuid())
+  name      String?
+  documents Document[]
+  User      User[]
+}
