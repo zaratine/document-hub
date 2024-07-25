@@ -22,7 +22,6 @@ async function extracted(file) {
 
     if (response.ok) {
         const {url, fields} = await response.json()
-
         const formData = new FormData()
         Object.entries(fields).forEach(([key, value]) => {
             formData.append(key, value as string);
@@ -39,7 +38,7 @@ async function extracted(file) {
         })
 
         if (uploadResponse.ok) {
-            alert('Upload successful!')
+            //alert('Upload successful!')
             //criar registro em Documentos
         } else {
             console.error('S3 Upload Error:', uploadResponse)
@@ -73,6 +72,7 @@ export default function Uploader() {
         setFiles([...files, ...filteredFiles]);
     }
     const handleFileSelect = (e) => {
+        console.log("chego aqui?")
         const filesFromInput: FileList = e.target.files!;
         const filteredFiles = Array.from(filesFromInput).filter((file: File) => allowedFileTypes.includes(file.type)  && file.size <= maxFileSize);
         setFiles([...files, ...filteredFiles]);
@@ -94,8 +94,8 @@ export default function Uploader() {
 
         await Promise.all(files.map(async (file) => {
 
-            const originalFile = file;
-            const imageFile = file;
+            //const originalFile = file;
+            //const imageFile = file;
             //check whether the file type is image or pdf. If PDF, convert PDF to image
             // if (file.type === 'application/pdf') {
             //     const pdf = await pdfjsLib.getDocument(file);
@@ -116,11 +116,10 @@ export default function Uploader() {
             //     const blob = await fetch(dataUrl).then(r => r.blob());
             //     imageFile = new File([blob], file.name, {type: 'image/jpeg'});
             // }
-
-            if(imageFile){
-                
-            }
-            await extracted(file);
+            // if(imageFile){
+            //
+            // }
+            extracted(file);
         }));
         setUploading(false);
         setFiles([]);
